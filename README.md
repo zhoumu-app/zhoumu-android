@@ -15,6 +15,31 @@
 
 ---
 
+## 下载安装
+
+到 **[Releases](https://github.com/zhoumu-app/zhoumu-android/releases/latest)** 下载 `ZhouMu-x.x-android.apk`，
+直接装就行（已经签好名了，不需要再自签）。
+
+- **需要 Android 8.0（API 26）或更高**
+- 装完第一次打开会问通知权限 —— **不给的话上下课提醒用不了**（其他功能正常）
+- Android 12 及以上还可能要「闹钟和提醒」权限，同样是为了让提醒准时响
+
+### 关于签名
+
+APK 用仓库里的 `keystore/zhoumu.jks` 签名，**密码是公开的**（`zhoumu2026`）。
+
+为什么公开：这样所有人装到的都是同一个签名的包，以后出新版能**直接覆盖升级**；
+如果每次换密钥签，Android 会拒绝安装签名不一致的更新。
+
+代价是别人也能签一个同名包。**想确认来源可信，请自己从源码编译**，
+或者对比 Release 里附的 `sha256`：
+
+```bash
+shasum -a 256 ZhouMu-1.5-android.apk
+```
+
+---
+
 ## 功能
 
 ### 周目
@@ -114,7 +139,7 @@
 # 指向你的 Android SDK
 echo "sdk.dir=/path/to/android-sdk" > local.properties
 
-# 编译
+# 编译 Debug 包
 ./gradlew :app:assembleDebug
 
 # 跑单元测试
@@ -122,6 +147,9 @@ echo "sdk.dir=/path/to/android-sdk" > local.properties
 
 # 一键校验（编译 + 测试）
 ./Tools/verify.sh
+
+# 打签好名的 Release APK（放到 build/ 根目录）
+./Tools/make_apk.sh
 ```
 
 摸不到 Android SDK 的话，至少可以单独跑核心逻辑的测试：

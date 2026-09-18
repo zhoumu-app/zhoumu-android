@@ -13,14 +13,36 @@ android {
         applicationId = "com.zhoumu.android"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
+        // versionCode 规则：major * 10000 + minor * 100 + patch
+        // 1.5.0 → 10500。和 iOS 版保持同一个版本号。
+        versionCode = 10500
         versionName = "1.5"
+    }
+
+    signingConfigs {
+        create("release") {
+            // 这是**公开的、开源项目共用的**密钥，密码写在 README 里。
+            //
+            // 为什么不用私钥：周目是靠 GitHub Release 分发无签名/自签名包的，
+            // 如果每次都用不同密钥签，用户就没法覆盖升级（Android 会拒绝签名不一致的包）。
+            // 公开密钥的代价是别人也能签一个同名包——但本项目本来就不声称 APK 来源可信，
+            // 想验证来源请自己从源码编译，或者对比 Release 里附的 sha256。
+            storeFile = file("../keystore/zhoumu.jks")
+            storePassword = "zhoumu2026"
+            keyAlias = "zhoumu"
+            keyPassword = "zhoumu2026"
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            applicationIdSuffix = ".debug"
         }
     }
 
