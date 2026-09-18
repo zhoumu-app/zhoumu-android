@@ -353,23 +353,30 @@ private fun TimeDialog(
     )
 }
 
+/**
+ * 小时 / 分钟两个加减控件。
+ *
+ * 之前并排放一行，结果分钟那个 `+` 被挤出屏幕了——
+ * 模拟器实测发现的。改成两行，一行一个，怎么都放得下。
+ */
 @Composable
 private fun MinuteRow(label: String, minutes: Int, colors: ZhoumuColors, onChange: (Int) -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(label, fontSize = 15.sp, color = colors.primaryText)
-        Spacer(Modifier.weight(1f))
-        CountStepper(
-            value = minutes / 60,
-            range = 0..23,
-            unit = "时",
-            colors = colors,
-        ) { onChange(it * 60 + minutes % 60) }
-        Spacer(Modifier.width(8.dp))
-        CountStepper(
-            value = minutes % 60,
-            range = 0..55,
-            unit = "分",
-            colors = colors,
-        ) { onChange((minutes / 60) * 60 + it) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CountStepper(
+                value = minutes / 60,
+                range = 0..23,
+                unit = "时",
+                colors = colors,
+            ) { onChange(it * 60 + minutes % 60) }
+            Spacer(Modifier.width(10.dp))
+            CountStepper(
+                value = minutes % 60,
+                range = 0..55,
+                unit = "分",
+                colors = colors,
+            ) { onChange((minutes / 60) * 60 + it) }
+        }
     }
 }

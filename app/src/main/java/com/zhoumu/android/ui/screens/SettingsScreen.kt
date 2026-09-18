@@ -245,20 +245,23 @@ fun CountStepper(
     range: IntRange,
     unit: String,
     colors: ZhoumuColors,
+    compact: Boolean = false,
     onChange: (Int) -> Unit,
 ) {
     Row(
         Modifier.clip(RoundedCornerShape(9.dp)).background(colors.accentSoft),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        StepperButton("−", value > range.first, colors) { onChange(value - 1) }
+        StepperButton("−", value > range.first, colors, compact) { onChange(value - 1) }
         Text(
             "$value $unit",
-            fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colors.accent,
-            modifier = Modifier.widthIn(min = 56.dp),
+            fontSize = if (compact) 13.sp else 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.accent,
+            modifier = Modifier.widthIn(min = if (compact) 42.dp else 56.dp),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
-        StepperButton("+", value < range.last, colors) { onChange(value + 1) }
+        StepperButton("+", value < range.last, colors, compact) { onChange(value + 1) }
     }
 }
 
@@ -267,16 +270,17 @@ private fun StepperButton(
     label: String,
     enabled: Boolean,
     colors: ZhoumuColors,
+    compact: Boolean = false,
     onClick: () -> Unit,
 ) {
     Text(
         label,
-        fontSize = 20.sp,
+        fontSize = if (compact) 17.sp else 20.sp,
         fontWeight = FontWeight.Bold,
         color = if (enabled) colors.accent else colors.faintText,
         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         modifier = Modifier
-            .size(40.dp, 34.dp)
+            .size(if (compact) 30.dp else 40.dp, 34.dp)
             .clickable(enabled = enabled, onClick = onClick)
             .wrapContentHeight(Alignment.CenterVertically),
     )
