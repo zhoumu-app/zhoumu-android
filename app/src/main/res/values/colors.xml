@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 和 App 主色一致（浅色模式） -->
+    <color name="zhoumu_blue">#2563EB</color>
+    <color name="zhoumu_background">#F6F9FF</color>
+</resources>

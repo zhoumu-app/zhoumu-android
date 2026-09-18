@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">周目</string>
+    <string name="widget_label">开学周目</string>
+    <string name="widget_description">在桌面直接看到今天第几周、今天上什么课。</string>
+</resources>
