@@ -11,6 +11,10 @@
 | :---: | :---: | :---: |
 | ![首页](Screenshots/01-home.png) | ![设置](Screenshots/02-settings.png) | ![提醒](Screenshots/03-notification.png) |
 
+| 桌面小组件 |
+| :---: |
+| ![小组件](Screenshots/05-widget.png) |
+
 > Android 模拟器（Pixel 6 / Android 15，1080×2400）实拍。
 
 ---
@@ -68,6 +72,8 @@ shasum -a 256 ZhouMu-1.5-android.apk
 
 不打开 App 也能看到第 N 周和今天的前三节课。
 
+![小组件](Screenshots/05-widget.png)
+
 ### 上下课提醒
 
 - **每节课上课前、下课前各提醒一次**，可以设置提前几分钟（默认 5 分钟）。
@@ -114,6 +120,7 @@ shasum -a 256 ZhouMu-1.5-android.apk
 | 数据持久化 | ✅ 重启 App 后设置还在（直接读 DataStore 确认过） |
 | **上下课提醒** | ✅ **闹钟真的排进了系统**（`dumpsys alarm` 里两个 `ReminderReceiver`，相差正好 45 分钟 = 课程时长），**通知也真的弹出来了**（见上图） |
 | 通知渠道 | ✅ `zhoumu.class`，importance=4（HIGH） |
+| **桌面小组件** | ✅ **加到桌面上真的渲染了**（见上图）—— Glance 的 `SessionWorker` 返回 SUCCESS，系统注册了 provider 和 RemoteViews |
 
 **实测中抓到并修掉的三个 bug**：
 
@@ -126,10 +133,7 @@ shasum -a 256 ZhouMu-1.5-android.apk
    更坑的是我还用 `runCatching` 把异常吞了，什么都没报。
    现在换成自己的矢量图标，并且改成显式 catch + 打日志。
 
-**还没验证的**：
-
-- **桌面小组件**：只验证了编译通过，没实际加到桌面上看过。
-  模拟器上加小组件要走启动器的长按菜单，自动化比较麻烦。
+至此**全部功能都在模拟器上真跑过了**。
 
 ## 自己编译
 
