@@ -140,7 +140,8 @@ object ClassReminders {
                    else "距离下课还有 $minutes 分钟"
 
         val n = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_menu_my_calendar)
+            // 小图标必须是本 App 的资源；用 android.R.drawable 会被系统静默丢弃
+            .setSmallIcon(com.zhoumu.android.R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -148,9 +149,13 @@ object ClassReminders {
             .setAutoCancel(true)
             .build()
 
-        runCatching {
+        try {
             NotificationManagerCompat.from(context)
                 .notify((subject + isStart).hashCode() and 0xFFFF, n)
+            android.util.Log.i("ZhouMu", "已发提醒通知：$title / $body")
+        } catch (e: SecurityException) {
+            // 用户把通知权限关了
+            android.util.Log.w("ZhouMu", "没有通知权限，提醒发不出去", e)
         }
     }
 }
@@ -158,6 +163,7 @@ object ClassReminders {
 /** 闹钟到点后由它把通知发出来。 */
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        android.util.Log.i("ZhouMu", "ReminderReceiver 收到广播：${intent.extras}")
         ClassReminders.notify(
             context,
             intent.getStringExtra("subject") ?: "下一节课",
