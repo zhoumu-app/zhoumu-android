@@ -14,7 +14,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // 全屏边到边。个别旧 ROM 上这个调用可能抛异常，包一层别让它拦住启动。
+        runCatching { enableEdgeToEdge() }
 
         val repo = SettingsRepository.get(applicationContext)
 

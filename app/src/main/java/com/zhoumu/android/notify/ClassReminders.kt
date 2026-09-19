@@ -16,6 +16,9 @@ import com.zhoumu.android.MainActivity
 import com.zhoumu.android.data.ScheduledClass
 import com.zhoumu.android.data.SettingsRepository
 import com.zhoumu.android.data.ZhoumuSettings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -49,12 +52,14 @@ object ClassReminders {
      * 重排今天的提醒。
      *
      * 先全撤掉再排，避免改完课表后旧的闹钟还在。
+     *
+     * 注意 [settings] 是从外面传进来的：不能在这里 `SettingsRepository.current()`，
+     * 因为设置是异步加载的，刚启动时读到的会是默认值（空的），提醒就排不上了。
      */
-    fun reschedule(context: Context) {
+    fun reschedule(context: Context, settings: ZhoumuSettings) {
         val alarm = context.getSystemService(android.app.AlarmManager::class.java) ?: return
-        val settings = SettingsRepository.get(context).current()
 
-        cancelAll(context)
+        cancelAll(context, settings)
 
         if (!settings.remindersEnabled) return
 
@@ -62,9 +67,9 @@ object ClassReminders {
         val lead = settings.reminderMinutes.toLong()
         for (c in settings.classes(LocalDate.now())) {
             // 上课前
-            schedule(alarm, context, c, c.start.minusMinutes(lead), now, isStart = true)
+            schedule(alarm, context, c, c.start.minusMinutes(lead), now, isStart = true, minutes = settings.reminderMinutes)
             // 下课前
-            schedule(alarm, context, c, c.end.minusMinutes(lead), now, isStart = false)
+            schedule(alarm, context, c, c.end.minusMinutes(lead), now, isStart = false, minutes = settings.reminderMinutes)
         }
     }
 
@@ -75,13 +80,14 @@ object ClassReminders {
         at: LocalDateTime,
         now: LocalDateTime,
         isStart: Boolean,
+        minutes: Int,
     ) {
         if (!at.isAfter(now)) return
         val trigger = at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra("subject", c.subject)
             putExtra("isStart", isStart)
-            putExtra("minutes", SettingsRepository.get(context).current().reminderMinutes)
+            putExtra("minutes", minutes)
             putExtra("time", "${c.start.hour}:%02d".format(c.start.minute))
             // 每节课的每个提醒都要有不同的 requestCode，否则会互相覆盖
             data = android.net.Uri.parse("zhoumu://reminder/${c.id}/$isStart")
@@ -100,10 +106,9 @@ object ClassReminders {
         }
     }
 
-    private fun cancelAll(context: Context) {
+    private fun cancelAll(context: Context, settings: ZhoumuSettings) {
         // PendingIntent 是按 requestCode + Intent 匹配的，这里靠重建同样的 Intent 来撤。
         // 简单起见：整体重排时只撤今天的（用上面同样的 hash 规则）。
-        val settings = SettingsRepository.get(context).current()
         for (c in settings.classes(LocalDate.now())) {
             for (isStart in listOf(true, false)) {
                 val intent = Intent(context, ReminderReceiver::class.java).apply {
@@ -181,7 +186,15 @@ class BootReceiver : BroadcastReceiver() {
             intent.action == Intent.ACTION_DATE_CHANGED ||
             intent.action == Intent.ACTION_TIME_CHANGED
         ) {
-            ClassReminders.reschedule(context)
+            val pending = goAsync()
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
+                try {
+                    val settings = SettingsRepository.get(context).awaitLoaded()
+                    ClassReminders.reschedule(context, settings)
+                } finally {
+                    pending.finish()
+                }
+            }
         }
     }
 }

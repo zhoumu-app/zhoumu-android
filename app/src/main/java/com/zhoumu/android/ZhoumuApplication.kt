@@ -26,16 +26,16 @@ class ZhoumuApplication : Application() {
         // 之前只在 onCreate 里排一次，结果用户改完课表提醒不会跟着变——
         // 实测出来的：加了一节课之后 dumpsys alarm 里还是空的。
         scope.launch {
-            repo.settings
-                .drop(1)                 // 首次由下面的 reschedule 负责，别重复
-                .distinctUntilChanged()
-                .collect {
-                    ClassReminders.reschedule(this@ZhoumuApplication)
-                    runCatching { WeekWidget.refresh(this@ZhoumuApplication) }
-                }
-        }
+            // 等第一次从磁盘读完，别拿默认值去排。
+            val loaded = repo.awaitLoaded()
+            ClassReminders.reschedule(this@ZhoumuApplication, loaded)
+            runCatching { WeekWidget.refresh(this@ZhoumuApplication) }
 
-        // 冷启动先排一次
-        ClassReminders.reschedule(this)
+            // 之后设置一变就重排
+            repo.settings.drop(1).distinctUntilChanged().collect {
+                ClassReminders.reschedule(this@ZhoumuApplication, it)
+                runCatching { WeekWidget.refresh(this@ZhoumuApplication) }
+            }
+        }
     }
 }

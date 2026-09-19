@@ -63,8 +63,29 @@ data class ZhoumuSettings(
 class SettingsRepository private constructor(private val store: DataStore<Preferences>) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val _settings = MutableStateFlow(loadInitialBlocking())
+
+    // 先给一份默认值，然后在后台把真实设置读进来。
+    //
+    // 之前这里写的是 `MutableStateFlow(loadInitialBlocking())`，
+    // 而 loadInitialBlocking 里是 `runBlocking { store.data.first() }` ——
+    // **在主线程上阻塞等 DataStore**。首次读或者 DataStore 正忙的时候会卡住，
+    // 表现就是界面停在白屏。改成异步，界面先显示默认值再刷新。
+    private val _settings = MutableStateFlow(ZhoumuSettings())
     val settings: StateFlow<ZhoumuSettings> = _settings.asStateFlow()
+
+    /** 第一次从磁盘读完才算就绪。后台任务（排提醒）要等这个，不能拿默认值去排。 */
+    private val ready = kotlinx.coroutines.CompletableDeferred<ZhoumuSettings>()
+
+    init {
+        scope.launch {
+            val loaded = load()
+            _settings.value = loaded
+            ready.complete(loaded)
+        }
+    }
+
+    /** 等设置读完。只能在后台协程里调。 */
+    suspend fun awaitLoaded(): ZhoumuSettings = ready.await()
 
     fun current(): ZhoumuSettings = _settings.value
 
@@ -88,11 +109,9 @@ class SettingsRepository private constructor(private val store: DataStore<Prefer
         }
     }
 
-    /** 首次构造时同步读一次，免得界面闪一下默认值。 */
-    private fun loadInitialBlocking(): ZhoumuSettings {
-        val p = runCatching {
-            kotlinx.coroutines.runBlocking { store.data.first() }
-        }.getOrNull() ?: return ZhoumuSettings()
+    /** 从 DataStore 读一次。只在后台线程调用。 */
+    private suspend fun load(): ZhoumuSettings {
+        val p = runCatching { store.data.first() }.getOrNull() ?: return ZhoumuSettings()
 
         return ZhoumuSettings(
             startDate = p[K.startDate]?.let { LocalDate.ofEpochDay(it) } ?: LocalDate.now(),

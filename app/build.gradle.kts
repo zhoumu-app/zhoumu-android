@@ -15,7 +15,7 @@ android {
         targetSdk = 35
         // versionCode 规则：major * 10000 + minor * 100 + patch
         // 1.5.0 → 10500。和 iOS 版保持同一个版本号。
-        versionCode = 10502
+        versionCode = 10503
         versionName = "1.5"
     }
 
