@@ -3,4 +3,7 @@
     <!-- 和 App 主色一致（浅色模式） -->
     <color name="zhoumu_blue">#2563EB</color>
     <color name="zhoumu_background">#F6F9FF</color>
+
+    <!-- 图标底色：和 iOS 图标、深色模式背景一致 -->
+    <color name="ic_launcher_background">#05080F</color>
 </resources>
