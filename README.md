@@ -135,6 +135,40 @@ shasum -a 256 ZhouMu-1.5-android.apk
 
 至此**全部功能都在模拟器上真跑过了**。
 
+## 兼容性
+
+### 系统
+
+- **Android 8.0（API 26）及以上**。minSdk 26，所以从 2017 年之后的机器基本都能装。
+- **旧版鸿蒙（HarmonyOS 2 / 3）可以用** —— 它们底层还是 Android 10，能装 APK。
+  > **HarmonyOS NEXT（纯血鸿蒙）不行**，那个不再兼容 Android 应用，装不了 APK。
+- 国产 ROM（EMUI / MIUI / ColorOS 等）理论上没问题，但见下面的注意事项。
+
+### 针对国产 ROM 做过的适配
+
+| 问题 | 处理 |
+| :--- | :--- |
+| **「强制深色」把界面反色成一片白** | 主题里显式 `forceDarkAllowed=false`，颜色完全由 App 控制 |
+| **窗口底色发白** | `windowBackground` 显式指定，不留系统默认的白色 |
+| **系统切换深浅色时重建界面（会闪白）** | Manifest 里加 `configChanges="uiMode\|…"` |
+| **某个界面没渲染出来时露出白底** | 整个 App 外面包了一层 `Surface`，兜底背景永远是 App 自己的颜色 |
+| `enforceStatusBarContrast` 在低版本不认识 | 单独放 `values-v29/`，低版本不会解析到 |
+
+### 国产 ROM 上要注意的
+
+- **上下课提醒可能不准时** ✗ —— 国产 ROM 会激进地杀后台、限制精确闹钟。
+  建议在 系统设置 ▸ 应用 ▸ 周目 里：
+  - 允许**自启动**
+  - 电池优化设为**无限制 / 不优化**
+  - 打开**闹钟和提醒**权限（Android 12+）
+- **桌面小组件**在个别 ROM 上需要手动允许「后台弹出界面」之类的权限。
+
+### 已实测
+
+只在 **Android 15 模拟器（Pixel 6）** 上跑过完整功能。
+旧版鸿蒙 / EMUI / MIUI **没有真机验证过** —— 有问题请开 issue，附上
+系统版本和截图。
+
 ## 自己编译
 
 需要 JDK 17+ 和 Android SDK（compileSdk 35）。

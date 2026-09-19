@@ -6,4 +6,8 @@
 
     <!-- 图标底色：和 iOS 图标、深色模式背景一致 -->
     <color name="ic_launcher_background">#05080F</color>
+
+    <!-- 窗口底色。给 Compose 还没画完的那一瞬间用，避免闪白。
+         用浅色主题的值（App 默认跟随系统，浅色设备上最常见）。 -->
+    <color name="zhoumu_window">#F6F9FF</color>
 </resources>

@@ -2,13 +2,16 @@ package com.zhoumu.android.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
@@ -116,7 +119,17 @@ fun ZhoumuTheme(
     }
 
     androidx.compose.runtime.CompositionLocalProvider(LocalZhoumuColors provides colors) {
-        MaterialTheme(colorScheme = scheme, content = content)
+        MaterialTheme(colorScheme = scheme) {
+            // 整个 App 铺一层背景色。
+            //
+            // 光靠各屏幕自己的 Scaffold(containerColor=…) 不够稳：
+            // 万一某个界面没画出来（旧 ROM 上出过白屏），露出来的是窗口底色，
+            // 默认是白的，整个 App 看起来就"白屏"了。
+            // 这里兜一层，背景永远是 App 自己的颜色。
+            Surface(color = colors.background, modifier = Modifier.fillMaxSize()) {
+                content()
+            }
+        }
     }
 }
 

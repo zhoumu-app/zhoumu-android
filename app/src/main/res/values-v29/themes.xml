@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- enforceStatusBarContrast / enforceNavigationBarContrast 是 API 29 才有的，
+         单独放一份，免得低版本解析到不认识的属性。 -->
+    <style name="Theme.Zhoumu" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/zhoumu_window</item>
+        <item name="android:colorBackground">@color/zhoumu_window</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
+</resources>

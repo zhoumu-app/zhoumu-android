@@ -1,7 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Zhoumu" parent="android:Theme.Material.Light.NoActionBar">
+    <!--
+      基础主题。
+
+      几个针对旧国产 ROM（EMUI / 鸿蒙 / MIUI 等）的适配点：
+
+      1. windowBackground 显式指定颜色。
+         不指定的话系统默认是白色，Compose 还没来得及画的时候会闪一下白屏；
+         有些 ROM 上更是会一直白着。
+
+      2. forceDarkAllowed = false
+         EMUI / 鸿蒙 / MIUI 都有「强制深色」功能，会把 App 的界面反色。
+         Compose 应用被强制反色后经常直接变成一片白 —— 而且只在浅色模式下出现。
+         这里明确关掉，界面颜色完全由 App 自己的主题控制。
+
+      3. 不用 Material.Light / Material 这种带明暗倾向的父主题，
+         免得和 App 自己的三态外观开关打架。
+
+      4. windowLightStatusBar 交给代码按当前主题设置（见 ZhoumuTheme）。
+    -->
+    <style name="Theme.Zhoumu" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/zhoumu_window</item>
+        <item name="android:colorBackground">@color/zhoumu_window</item>
+        <item name="android:forceDarkAllowed">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 </resources>
